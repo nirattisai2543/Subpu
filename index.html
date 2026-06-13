@@ -81,7 +81,7 @@
         <div id="two-3" class="number-box-sub two-group" data-base-size="38" style="top:62%; left:66%; width:11%; font-size:38px;">..</div>
         <div id="two-4" class="number-box-sub two-group" data-base-size="38" style="top:62%; left:77%; width:11%; font-size:38px;">..</div>
 
-        <!-- เลข 3 ตัว ขยับห่างออกจากกันขึ้นมาอีกหน่อยนึง (ปรับ left เป็น 31%, 44%, 57%) -->
+        <!-- เลข 3 ตัว คงระยะห่างที่ปรับใหม่ไว้ (31%, 44%, 57%) -->
         <div id="three-1" class="number-box-sub three-group" data-base-size="32" style="top:85%; left:31%; width:12%; font-size:32px;">...</div>
         <div id="three-2" class="number-box-sub three-group" data-base-size="32" style="top:85%; left:44%; width:12%; font-size:32px;">...</div>
         <div id="three-3" class="number-box-sub three-group" data-base-size="32" style="top:85%; left:57%; width:12%; font-size:32px;">...</div>
@@ -119,7 +119,8 @@
         "หวยรัฐบาล": [{n:"รัฐบาลไทย", f:"th"}, {n:"ธ.ก.ส", f:"th"}, {n:"ออมสิน", f:"th"}]
     };
 
-    const STORAGE_KEY = "hongthong_lucky_hermit_device_storage_v3_2026";
+    // เปลี่ยนคีย์ตรงนี้ให้เป็นชื่อเฉพาะของเว็บนี้เท่านั้น ป้องกันการเซฟทับกับเว็บอื่น
+    const STORAGE_KEY = "GRANDPA_HERMIT_LUCKY_LOTTERY_EXCLUSIVE_SAVE_2026";
     let curF = "หวย จันทร์-ศุกร์", curI = 0, isLocked = false, curDate = new Date(), currentScale = 100;
 
     function changeFontSize(scalePercent) {
