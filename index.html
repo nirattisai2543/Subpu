@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ปู่ฤๅษีนำโชค</title>
+    <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+    <link href="https://fonts.cdnfonts.com/css/db-heavent" rel="stylesheet">
+    <style>
+        body { margin: 0; padding: 20px; background-color: #0b0b0b; font-family: 'DB Heavent', sans-serif; color: white; min-height: 100vh; display: flex; flex-direction: column; align-items: center; font-size: 22px; }
+        #page-menu, #page-main { width: 100%; max-width: 600px; }
+        #page-main { display: none; text-align: center; }
+        .button-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+        .btn-action { padding: 8px 12px; font-size: 20px; font-weight: bold; border: none; border-radius: 10px; cursor: pointer; color: #fff; font-family: 'DB Heavent', sans-serif; }
+        .full-width { grid-column: span 2; }
+        .nav-grid { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 8px; margin-bottom: 10px; }
+        .search-input { width: 90%; padding: 8px 12px; margin: 0 auto 15px; display: block; border-radius: 25px; border: 1px solid #b8860b; background: #222; color: white; text-align: center; font-family: 'DB Heavent', sans-serif; font-size: 20px; }
+        .btn-folder { width: 100%; padding: 10px; background: #222; border: 2px solid #b8860b; color: #ffd700; border-radius: 12px; margin-bottom: 10px; cursor: pointer; font-size: 24px; font-weight: bold; font-family: 'DB Heavent', sans-serif; }
+        .lottery-list { display: none; flex-wrap: wrap; gap: 5px; justify-content: center; background: #1a1a1a; padding: 10px; border-radius: 10px; margin-bottom: 15px; }
+        .lottery-list.active { display: flex; }
+        .btn-lotto { padding: 6px 12px; background: #333; border: 1px solid #555; color: #fff; cursor: pointer; border-radius: 5px; font-size: 18px; display: flex; align-items: center; gap: 8px; font-family: 'DB Heavent', sans-serif; }
+        
+        .container { position: relative; width: 100%; aspect-ratio: 1 / 1; background-image: url('22377.png'); background-size: cover; background-position: center; border-radius: 10px; margin: 0 auto; overflow: hidden; cursor: pointer; }
+        .number-box { position: absolute; font-weight: 700; color: #ffd700; text-align: center; font-family: 'DB Heavent', sans-serif; touch-action: none; cursor: pointer; border: 2px solid transparent; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.85); }
+        
+        #title { color: #ffd700; font-weight: 900; text-shadow: 2px 2px 5px #000, -2px -2px 5px #000, 2px -2px 5px #000, -2px 2px 5px #000 !important; }
+        
+        .number-box-sub { position: absolute; font-weight: 900; color: #991f16; font-family: 'DB Heavent', sans-serif; text-align: center; line-height: 1; text-shadow: 1px 1px 0px #ffd700, -1px -1px 0px #ffd700, 1px -1px 0px #ffd700, -1px 1px 0px #ffd700, 2px 2px 3px rgba(0,0,0,0.8); touch-action: none; cursor: pointer; border: 2px solid transparent; }
+
+        .date-control { background: #222; padding: 10px; border-radius: 10px; border: 1px solid #b8860b; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .date-label-style { font-size: 24px; font-weight: bold; font-family: 'DB Heavent', sans-serif; }
+        .size-control-panel { display: none; background: #222; padding: 12px; border-radius: 10px; border: 1px solid #ffd700; margin-bottom: 12px; text-align: center; }
+        .size-slider { width: 80%; accent-color: #ffd700; cursor: pointer; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div id="page-menu">
+    <h2 style="text-align:center; color:#ffd700; font-family: 'DB Heavent', sans-serif; font-size: 32px;">เลือกหมวดหมู่หวย (ปู่ฤๅษี)</h2>
+    <input type="text" class="search-input" placeholder="🔍 ค้นหาชื่อหวย..." oninput="filterLottery(this.value)">
+    <div id="menu"></div>
+</div>
+
+<div id="page-main">
+    <div class="date-control">
+        <button onclick="adjustDate(-1)" style="border:none; background:#b8860b; color:white; padding:5px 15px; border-radius:5px; cursor:pointer; font-family: 'DB Heavent', sans-serif; font-size: 20px;">- วัน</button>
+        <span id="date-label" class="date-label-style"></span>
+        <button onclick="adjustDate(1)" style="border:none; background:#b8860b; color:white; padding:5px 15px; border-radius:5px; cursor:pointer; font-family: 'DB Heavent', sans-serif; font-size: 20px;">+ วัน</button>
+    </div>
+
+    <div class="button-grid">
+        <button class="btn-action full-width" style="background:linear-gradient(45deg, #b8860b, #ffd700); color:#000;" onclick="genNumbers()">สุ่มเลขนำโชคปู่ฤๅษี</button>
+        <button class="btn-action full-width" style="background:linear-gradient(45deg, #28a745, #20c997);" onclick="exportForIOS()">📸 บันทึกรูป (iOS)</button>
+        <button class="btn-action" id="lock-btn" onclick="toggleLock()" style="background:#333;">🔓 ปลดล็อค</button>
+        <button class="btn-action" style="background:#cc0000;" onclick="resetAll()">🔄 รีเซ็ตทั้งหมด</button>
+    </div>
+
+    <div id="size-panel" class="size-control-panel">
+        <div style="font-size: 18px; color: #ffd700;">📐 เลื่อนเพื่อย่อ-ขยายขนาดอักษรในรูป</div>
+        <input type="range" id="fontSizeSlider" class="size-slider" min="30" max="130" value="100" oninput="changeFontSize(this.value)">
+    </div>
+
+    <div class="nav-grid">
+        <button class="btn-action" style="background:#555;" onclick="moveLotto(-1)">◀ ก่อนหน้า</button>
+        <button class="btn-action" style="background:#444;" onclick="showPage('page-menu')">เมนูหลัก</button>
+        <button class="btn-action" style="background:#555;" onclick="moveLotto(1)">ถัดไป ▶</button>
+    </div>
+    
+    <div class="container" id="capture" onclick="exportCanvas()">
+        <!-- ชื่อหวย & วันที่ -->
+        <div id="title" class="number-box" data-base-size="42" style="top:22%; left:36%; width:58%; font-size:42px; font-weight:900;">หวย</div>
+        <div id="date-display" class="number-box" data-base-size="18" style="top:29%; left:36%; width:58%; font-size:18px; color:#ffd700; font-weight:bold;"></div>
+        
+        <!-- เลขตัวเดียว -->
+        <div id="single-1" class="number-box-sub" data-base-size="50" style="top:42%; left:48%; width:15%; font-size:50px;">.</div>
+        <div id="single-2" class="number-box-sub" data-base-size="50" style="top:42%; left:72%; width:15%; font-size:50px;">.</div>
+
+        <!-- เลข 2 ตัว ล็อคระยะเดิมไว้คงที่ -->
+        <div id="two-1" class="number-box-sub two-group" data-base-size="38" style="top:62%; left:44%; width:11%; font-size:38px;">..</div>
+        <div id="two-2" class="number-box-sub two-group" data-base-size="38" style="top:62%; left:55%; width:11%; font-size:38px;">..</div>
+        <div id="two-3" class="number-box-sub two-group" data-base-size="38" style="top:62%; left:66%; width:11%; font-size:38px;">..</div>
+        <div id="two-4" class="number-box-sub two-group" data-base-size="38" style="top:62%; left:77%; width:11%; font-size:38px;">..</div>
+
+        <!-- เลข 3 ตัว ขยับห่างออกจากกันขึ้นมาอีกหน่อยนึง (ปรับ left เป็น 31%, 44%, 57%) -->
+        <div id="three-1" class="number-box-sub three-group" data-base-size="32" style="top:85%; left:31%; width:12%; font-size:32px;">...</div>
+        <div id="three-2" class="number-box-sub three-group" data-base-size="32" style="top:85%; left:44%; width:12%; font-size:32px;">...</div>
+        <div id="three-3" class="number-box-sub three-group" data-base-size="32" style="top:85%; left:57%; width:12%; font-size:32px;">...</div>
+    </div>
+</div>
+
+<script>
+    const db = {
+        "หวย จันทร์-ศุกร์": [
+            {n:"ลาว Extra", f:"la"}, {n:"นิเคอิเช้า VIP", f:"jp"}, {n:"นอยอาเซียน", f:"vn"}, {n:"นิเคอิเช้า", f:"jp"}, 
+            {n:"จีนเช้า VIP", f:"cn"}, {n:"จีนเช้า", f:"cn"}, {n:"ลาว TV", f:"la"}, {n:"ฮั่งเส็งเช้า VIP", f:"hk"}, 
+            {n:"ฮั่งเส็งเช้า", f:"hk"}, {n:"ฮานอย HD", f:"vn"}, {n:"ไต้หวัน VIP", f:"tw"}, {n:"ฮานอย STAR", f:"vn"}, 
+            {n:"ไต้หวัน", f:"tw"}, {n:"เกาหลี VIP", f:"kr"}, {n:"เกาหลี", f:"kr"}, {n:"นิเคอิบ่าย", f:"jp"}, 
+            {n:"นิเคอิบ่าย VIP", f:"jp"}, {n:"ลาว HD", f:"la"}, {n:"จีนบ่าย", f:"cn"}, {n:"ฮานอย TV", f:"vn"}, 
+            {n:"จีนบ่าย VIP", f:"cn"}, {n:"ฮั่งเส็งบ่าย", f:"hk"}, {n:"ฮั่งเส็งบ่าย VIP", f:"hk"}, {n:"ลาวสตาร์", f:"la"}, 
+            {n:"สิงคโปร์", f:"sg"}, {n:"ไทยเย็น", f:"th"}, {n:"ฮานอยกาชาด", f:"vn"}, {n:"อินเดีย", f:"in"}, 
+            {n:"สิงคโปร์ VIP", f:"sg"}, {n:"อียิปต์", f:"eg"}, {n:"ฮานอยพิเศษ", f:"vn"}, {n:"ฮานอยสามัคคี", f:"vn"}, 
+            {n:"ฮานอยปกติ", f:"vn"}, {n:"ฮานอย VIP", f:"vn"}, {n:"ฮานอยพัฒนา", f:"vn"}, {n:"ลาวพัฒนา", f:"la"}, 
+            {n:"ลาวสามัคคี", f:"la"}, {n:"ลาวอาเซียน", f:"la"}, {n:"ลาว VIP", f:"la"}, {n:"ลาวสามัคคี VIP", f:"la"}, 
+            {n:"อังกฤษ VIP", f:"gb"}, {n:"ลาวสตาร์ VIP", f:"la"}, {n:"ฮานอย Extra", f:"vn"}, {n:"อังกฤษ", f:"gb"}, 
+            {n:"เยอรมัน", f:"de"}, {n:"รัสเซีย", f:"ru"}, {n:"เยอรมัน VIP", f:"de"}, {n:"ลาวกาชาด", f:"la"}, 
+            {n:"รัสเซีย VIP", f:"ru"}, {n:"ดาวโจนส์ VIP", f:"us"}, {n:"ดาวโจนส์", f:"us"}, {n:"ดาวโจนส์ STAR", f:"us"}
+        ],
+        "หวย เสาร์-อาทิตย์": [
+            {n:"ลาว Extra", f:"la"}, {n:"นิเคอิเช้า VIP", f:"jp"}, {n:"นอยอาเซียน", f:"vn"}, {n:"จีนเช้า VIP", f:"cn"}, 
+            {n:"ลาว TV", f:"la"}, {n:"ฮั่งเส็งเช้า VIP", f:"hk"}, {n:"ฮานอย HD", f:"vn"}, {n:"ไต้หวัน VIP", f:"tw"}, 
+            {n:"ฮานอย STAR", f:"vn"}, {n:"เกาหลี VIP", f:"kr"}, {n:"นิเคอิบ่าย VIP", f:"jp"}, {n:"ลาว HD", f:"la"}, 
+            {n:"ฮานอย TV", f:"vn"}, {n:"จีนบ่าย VIP", f:"cn"}, {n:"ฮั่งเส็งบ่าย VIP", f:"hk"}, {n:"ลาวสตาร์", f:"la"}, 
+            {n:"ฮานอยกาชาด", f:"vn"}, {n:"สิงคโปร์ VIP", f:"sg"}, {n:"ฮานอยพิเศษ", f:"vn"}, {n:"ฮานอยสามัคคี", f:"vn"}, 
+            {n:"ฮานอยปกติ", f:"vn"}, {n:"ฮานอย VIP", f:"vn"}, {n:"ฮานอยพัฒนา", f:"vn"}, {n:"ลาวสามัคคี", f:"la"}, 
+            {n:"ลาวอาเซียน", f:"la"}, {n:"ลาว VIP", f:"la"}, {n:"ลาวสามัคคี VIP", f:"la"}, {n:"อังกฤษ VIP", f:"gb"}, {n:"ลาวสตาร์ VIP", f:"la"}, 
+            {n:"ฮานอย Extra", f:"vn"}, {n:"เยอรมัน VIP", f:"de"}, {n:"ลาวกาชาด", f:"la"}, 
+            {n:"รัสเซีย VIP", f:"ru"}, {n:"ดาวโจนส์ VIP", f:"us"}, {n:"ดาวโจนส์ STAR", f:"us"}],
+        
+        "หวยรัฐบาล": [{n:"รัฐบาลไทย", f:"th"}, {n:"ธ.ก.ส", f:"th"}, {n:"ออมสิน", f:"th"}]
+    };
+
+    const STORAGE_KEY = "hongthong_lucky_hermit_device_storage_v3_2026";
+    let curF = "หวย จันทร์-ศุกร์", curI = 0, isLocked = false, curDate = new Date(), currentScale = 100;
+
+    function changeFontSize(scalePercent) {
+        currentScale = parseInt(scalePercent);
+        document.querySelectorAll('.number-box, .number-box-sub').forEach(box => {
+            const baseSize = parseFloat(box.getAttribute('data-base-size'));
+            if (baseSize) box.style.fontSize = `${(baseSize * currentScale) / 100}px`;
+        });
+        save();
+    }
+
+    function drawCanvasAndExport(callback) {
+        const c = document.createElement('canvas'), ctx = c.getContext('2d'), img = new Image(); 
+        img.src = '22377.png'; 
+        img.onload = () => { 
+            c.width = img.width; c.height = img.height; ctx.drawImage(img, 0, 0, c.width, c.height); 
+            const container = document.getElementById('capture'); 
+            
+            document.querySelectorAll('.number-box').forEach(box => { 
+                const s = window.getComputedStyle(box), rect = box.getBoundingClientRect(), cont = container.getBoundingClientRect(); 
+                const centerX = (rect.left - cont.left + rect.width / 2) / container.offsetWidth; 
+                const centerY = (rect.top - cont.top + rect.height / 2) / container.offsetHeight; 
+                
+                ctx.font = `900 ${parseFloat(s.fontSize) * (c.width / container.offsetWidth)}px 'DB Heavent'`; 
+                ctx.fillStyle = s.color;
+                ctx.shadowColor = '#000000'; ctx.shadowBlur = 8; ctx.shadowOffsetX = 2; ctx.shadowOffsetY = 2;
+                
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; 
+                ctx.fillText(box.textContent, centerX * c.width, centerY * c.height); 
+            }); 
+
+            document.querySelectorAll('.number-box-sub').forEach(box => { 
+                const s = window.getComputedStyle(box), rect = box.getBoundingClientRect(), cont = container.getBoundingClientRect(); 
+                const centerX = (rect.left - cont.left + rect.width / 2) / container.offsetWidth; 
+                const centerY = (rect.top - cont.top + rect.height / 2) / container.offsetHeight; 
+                const fSize = parseFloat(s.fontSize) * (c.width / container.offsetWidth);
+                
+                ctx.font = `900 ${fSize}px 'DB Heavent'`; 
+                ctx.fillStyle = '#991f16'; 
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; 
+                
+                ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = fSize * 0.08; 
+                ctx.strokeText(box.textContent, centerX * c.width, centerY * c.height);
+                
+                ctx.fillText(box.textContent, centerX * c.width, centerY * c.height); 
+            }); 
+            
+            callback(c.toDataURL("image/png"));
+        };
+    }
+
+    function exportCanvas() { drawCanvasAndExport((dataURL) => { const l = document.createElement('a'); l.download = 'LottoHermit_' + Date.now() + '.png'; l.href = dataURL; l.click(); }); }
+    function exportForIOS() {
+        drawCanvasAndExport((dataURL) => {
+            const tempPage = document.createElement('div');
+            tempPage.id = 'temp-ios-page';
+            tempPage.style = "position:fixed; top:0; left:0; width:100%; height:100%; z-index:9999; text-align:center; padding:20px; color:white; background:#0b0b0b; overflow-y:auto;";
+            tempPage.innerHTML = `<h3 style="color:#ffd700; font-family:'DB Heavent', sans-serif; font-size:28px;">กดค้างที่รูป > บันทึกไปยังรูปภาพ</h3><img src="${dataURL}" style="width:100%; max-width:500px; border:2px solid #b8860b; border-radius:10px;"><br><br><button onclick="document.getElementById('temp-ios-page').remove(); document.getElementById('page-main').style.display='block';" style="padding:10px 25px; background:#b8860b; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer; font-family:'DB Heavent', sans-serif; font-size:22px;">ย้อนกลับ</button>`;
+            document.body.appendChild(tempPage);
+            document.getElementById('page-main').style.display = 'none';
+        });
+    }
+
+    function loadLotto(f, i) { curF = f; curI = i; document.getElementById('title').textContent = db[f][i].n; showPage('page-main'); genNumbers(); save(); }
+    function showPage(p) { document.getElementById('page-menu').style.display = p=='page-menu'?'block':'none'; document.getElementById('page-main').style.display = p=='page-main'?'block':'none'; }
+    function moveLotto(d) { curI += d; if(curI < 0) curI = 0; if(curI >= db[curF].length) curI = db[curF].length - 1; loadLotto(curF, curI); }
+    function adjustDate(d) { curDate.setDate(curDate.getDate() + d); const s = curDate.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' }); document.getElementById('date-label').textContent = s; document.getElementById('date-display').textContent = s; save(); }
+    
+    function genNumbers() { 
+        let s1 = Math.floor(Math.random()*10), s2; 
+        do { s2 = Math.floor(Math.random()*10); } while(s2 === s1); 
+        document.getElementById('single-1').textContent = s1; 
+        document.getElementById('single-2').textContent = s2; 
+
+        const randDigit = () => Math.floor(Math.random()*10);
+        const makeTwo = () => Math.random() > 0.5 ? "" + s1 + randDigit() : "" + s2 + randDigit();
+        const makeThree = () => "" + (Math.random() > 0.5 ? s1 : s2) + randDigit() + randDigit();
+
+        document.getElementById('two-1').textContent = makeTwo();
+        document.getElementById('two-2').textContent = makeTwo();
+        document.getElementById('two-3').textContent = makeTwo();
+        document.getElementById('two-4').textContent = makeTwo();
+
+        document.getElementById('three-1').textContent = makeThree();
+        document.getElementById('three-2').textContent = makeThree();
+        document.getElementById('three-3').textContent = makeThree();
+        
+        save(); 
+    }
+
+    function save() { 
+        const s = {}; 
+        document.querySelectorAll('.number-box, .number-box-sub').forEach(b => { s[b.id] = {x:b.getAttribute('data-x')||0, y:b.getAttribute('data-y')||0, txt:b.textContent}; }); 
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({s, curF, curI, date:curDate, scale:currentScale})); 
+    }
+    
+    function load() { 
+        const d = JSON.parse(localStorage.getItem(STORAGE_KEY)); 
+        if(d) { 
+            curF = d.curF; curI = d.curI; curDate = new Date(d.date); currentScale = d.scale || 100; 
+            document.getElementById('fontSizeSlider').value = currentScale; changeFontSize(currentScale); 
+            Object.keys(d.s).forEach(id => { const el=document.getElementById(id); if(el) { el.textContent=d.s[id].txt; el.style.transform=`translate(${d.s[id].x}px, ${d.s[id].y}px)`; el.setAttribute('data-x', d.s[id].x); el.setAttribute('data-y', d.s[id].y); } }); 
+            adjustDate(0); 
+        } 
+    }
+    
+    function resetAll() { 
+        localStorage.removeItem(STORAGE_KEY); 
+        location.reload(); 
+    }
+    
+    function toggleLock() { isLocked = !isLocked; document.getElementById('lock-btn').textContent = isLocked ? "🔒 ล็อคแล้ว" : "🔓 ปลดล็อค"; document.getElementById('size-panel').style.display = isLocked ? "none" : "block"; }
+    function filterLottery(q) { document.querySelectorAll('.btn-lotto').forEach(b => b.style.display = b.textContent.toLowerCase().includes(q.toLowerCase()) ? "block" : "none"); }
+    
+    interact('.number-box, .number-box-sub').draggable({ 
+        listeners: { 
+            move(e) { 
+                if(!isLocked) { 
+                    const t = e.target;
+                    let targets = [t]; 
+
+                    if (t.classList.contains('two-group')) {
+                        targets = Array.from(document.querySelectorAll('.two-group'));
+                    } else if (t.classList.contains('three-group')) {
+                        targets = Array.from(document.querySelectorAll('.three-group'));
+                    }
+
+                    targets.forEach(el => {
+                        const x = (parseFloat(el.getAttribute('data-x')) || 0) + e.dx; 
+                        const y = (parseFloat(el.getAttribute('data-y')) || 0) + e.dy; 
+                        el.style.transform = `translate(${x}px, ${y}px)`; 
+                        el.setAttribute('data-x', x); 
+                        el.setAttribute('data-y', y); 
+                    });
+                    save(); 
+                } 
+            } 
+        } 
+    });
+    
+    Object.keys(db).forEach(f => { let b=document.createElement('button'); b.className='btn-folder'; b.textContent=f; let l=document.createElement('div'); l.className='lottery-list'; b.onclick = () => { document.querySelectorAll('.lottery-list').forEach(i => { if(i !== l) i.classList.remove('active'); }); l.classList.toggle('active'); }; db[f].forEach((item,i) => { let s=document.createElement('button'); s.className='btn-lotto'; let img = document.createElement('img'); img.src = `https://flagcdn.com/w20/${item.f}.png`; img.style.borderRadius="2px"; s.appendChild(img); s.append(item.n); s.onclick=(e)=>{e.stopPropagation(); loadLotto(f,i)}; l.appendChild(s); }); document.getElementById('menu').appendChild(b); document.getElementById('menu').appendChild(l); });
+    window.onload = () => { load(); curDate = new Date(); adjustDate(0); };
+</script>
+</body>
+</html>
